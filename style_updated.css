@@ -1,0 +1,97 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+session_start();
+include 'database.php';
+
+if (!isset($_SESSION['id_etudiant'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$student_id = $_SESSION['id_etudiant'];
+
+// Fetch admin name
+$stmt = $conn->prepare("SELECT etudiantNom, etudiantPrenom FROM etudiants WHERE id_etudiant = ?");
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$stmt->bind_result($etudiantNom);
+$stmt->fetch();
+$stmt->close();
+
+$success = "";
+$error = "";
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étudiant - Modules & Informations</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<footer>
+<button id="scroll-module" style="margin: 10px; padding: 8px 12px; cursor: pointer;">+</button>
+</footer>
+
+<main>
+    <header>
+        <h2 class="welcome">Bonjour, <?= htmlspecialchars($etudiantNom . ' ' . $etudiantPrenom); ?> </h2>
+        <p class="date"><?= date('d/m/Y') ?></p>
+    </header>
+
+    <div class="image-container" style="text-align:center; margin: 20px 0;">
+        <img src="images/index_etudiant.png" alt="Index Etudiant Image" style="max-width: 100%; height: auto;">
+    </div>
+
+    <!-- Student page content can go here -->
+
+</main>
+
+<footer>
+
+    <button class="logout" id="logout-btn" title="Se déconnecter">⎋</button>
+</footer>
+
+<script>
+document.getElementById('logout-btn').addEventListener('click', function() {
+    window.location.href = 'login.php';
+    
+});
+document.getElementById('scroll-module').addEventListener('click', function() {
+    document.querySelector('.ajouter-module').scrollIntoView({ behavior: 'smooth' });
+});
+// Function to hide success and error messages
+function hideMessagesWithTimer() {
+    const successMsg = document.querySelector('.success-message');
+    const errorMsg = document.querySelector('.error-message');
+
+    if (successMsg) {
+        setTimeout(() => {
+            successMsg.style.transition = 'opacity 0.5s ease';
+            successMsg.style.opacity = '0';
+            setTimeout(() => successMsg.style.display = 'none', 500);
+        }, 4000);
+    }
+
+    if (errorMsg) {
+        setTimeout(() => {
+            errorMsg.style.transition = 'opacity 0.5s ease';
+            errorMsg.style.opacity = '0';
+            setTimeout(() => errorMsg.style.display = 'none', 500);
+        }, 4000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
+    hideMessagesWithTimer();
+});
+</script>
+
+</body>
+</html>
